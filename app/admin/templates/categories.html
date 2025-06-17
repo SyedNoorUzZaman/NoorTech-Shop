@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Categories - Admin Panel{% endblock %}
+
+{% block content %}
+    <div class="mb-6 flex flex-wrap justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold">Categories</h1>
+            <p class="text-gray-600">Manage product categories</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+            <a href="{{ url_for('add_category') }}" 
+               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <i class="fas fa-plus mr-2"></i> Add New Category
+            </a>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for category in categories %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ category.id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium">{{ category.name }}</td>
+                            <td class="px-6 py-4">
+                                {{ category.description or 'No description' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <a href="{{ url_for('products') }}?category={{ category.id }}" class="text-blue-600 hover:underline">
+                                    View products
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <div class="flex space-x-2">
+                                    <a href="{{ url_for('edit_category', category_id=category.id) }}" class="text-blue-600 hover:text-blue-900">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <form method="post" action="{{ url_for('delete_category', category_id=category.id) }}" 
+                                          class="inline-block"
+                                          onsubmit="return confirm('Are you sure you want to delete this category? Any products using this category will become uncategorized.');">
+                                        <button type="submit" class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                <p>No categories found</p>
+                                <a href="{{ url_for('add_category') }}" class="text-blue-600 hover:underline mt-2 block">
+                                    Add your first category
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %} 

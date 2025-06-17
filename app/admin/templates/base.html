@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel - NoorTech Shop{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .sidebar {
+            width: 250px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                overflow: hidden;
+            }
+            .sidebar.active {
+                width: 250px;
+            }
+        }
+        .flash-message {
+            animation: fadeOut 5s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <div class="flex flex-1">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar bg-gray-800 text-white flex flex-col fixed h-full z-10 transition-all duration-300">
+            <div class="p-4 border-b border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-xl font-bold">NoorTech Shop Admin</h1>
+                    <button id="closeSidebar" class="md:hidden text-gray-400 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <nav class="flex-grow py-4 overflow-y-auto">
+                <ul>
+                    <li>
+                        <a href="{{ url_for('index') }}" class="flex items-center px-4 py-3 {% if request.path == url_for('index') %}bg-blue-700{% else %}hover:bg-gray-700{% endif %}">
+                            <i class="fas fa-tachometer-alt w-6"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('products') }}" class="flex items-center px-4 py-3 {% if '/products' in request.path %}bg-blue-700{% else %}hover:bg-gray-700{% endif %}">
+                            <i class="fas fa-box w-6"></i>
+                            <span>Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('categories') }}" class="flex items-center px-4 py-3 {% if '/categories' in request.path %}bg-blue-700{% else %}hover:bg-gray-700{% endif %}">
+                            <i class="fas fa-tags w-6"></i>
+                            <span>Categories</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('orders') }}" class="flex items-center px-4 py-3 {% if '/orders' in request.path %}bg-blue-700{% else %}hover:bg-gray-700{% endif %}">
+                            <i class="fas fa-shopping-cart w-6"></i>
+                            <span>Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('users') }}" class="flex items-center px-4 py-3 {% if '/users' in request.path and not '/admin-users' in request.path %}bg-blue-700{% else %}hover:bg-gray-700{% endif %}">
+                            <i class="fas fa-users w-6"></i>
+                            <span>Customers</span>
+                        </a>
+                    </li>
+                    {% if session.get('is_super_admin') %}
+                    <li>
+                        <a href="{{ url_for('admin_users') }}" class="flex items-center px-4 py-3 {% if '/admin-users' in request.path %}bg-blue-700{% else %}hover:bg-gray-700{% endif %}">
+                            <i class="fas fa-user-shield w-6"></i>
+                            <span>Admin Users</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            <div class="p-4 border-t border-gray-700">
+                <a href="{{ url_for('logout') }}" class="flex items-center text-red-400 hover:text-red-300">
+                    <i class="fas fa-sign-out-alt w-6"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <div class="flex-1 md:ml-64">
+            <!-- Top Navbar -->
+            <header class="bg-white shadow-sm">
+                <div class="flex items-center justify-between px-4 py-3">
+                    <button id="openSidebar" class="md:hidden text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <div class="flex items-center">
+                        <span class="text-gray-700 mr-2">Welcome, {{ session.get('admin_username') }}</span>
+                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="container mx-auto px-4 mt-4">
+                        {% for category, message in messages %}
+                            <div class="flash-message p-4 rounded {% if category == 'error' %}bg-red-200 border border-red-400 text-red-800{% else %}bg-green-200 border border-green-400 text-green-800{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <!-- Page Content -->
+            <main class="p-6">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        // Mobile sidebar toggling
+        document.getElementById('openSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.add('active');
+        });
+        
+        document.getElementById('closeSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('active');
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

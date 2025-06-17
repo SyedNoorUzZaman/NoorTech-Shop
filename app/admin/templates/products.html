@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Products - Admin Panel{% endblock %}
+
+{% block content %}
+    <div class="mb-6 flex flex-wrap justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold">Products</h1>
+            <p class="text-gray-600">Manage your product catalog</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+            <a href="{{ url_for('add_product') }}" 
+               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <i class="fas fa-plus mr-2"></i> Add New Product
+            </a>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for product in products %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ product.id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <img src="{{ product.image_url }}" alt="{{ product.name }}" 
+                                     class="h-10 w-10 object-cover"
+                                     onerror="this.src='/admin/static/images/placeholder.jpg'">
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ product.name }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ product.category_name or 'Uncategorized' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                ${{ "%.2f"|format(product.price) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs rounded-full {% if product.stock > 10 %}bg-green-100 text-green-800
+                                          {% elif product.stock > 0 %}bg-yellow-100 text-yellow-800
+                                          {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ product.stock }} in stock
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <div class="flex space-x-2">
+                                    <a href="{{ url_for('edit_product', product_id=product.id) }}" class="text-blue-600 hover:text-blue-900">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <form method="post" action="{{ url_for('delete_product', product_id=product.id) }}" 
+                                          class="inline-block"
+                                          onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                        <button type="submit" class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                                <p>No products found</p>
+                                <a href="{{ url_for('add_product') }}" class="text-blue-600 hover:underline mt-2 block">
+                                    Add your first product
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %} 

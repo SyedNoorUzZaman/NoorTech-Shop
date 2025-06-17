@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}NoorTech Shop - Electronics Market{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <div class="bg-blue-600 text-white rounded-lg mb-8">
+        <div class="container mx-auto px-6 py-16">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-6 md:mb-0">
+                    <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
+                        Premium Electronics at Unbeatable Prices
+                    </h1>
+                    <p class="text-xl mb-6">
+                        Discover the latest tech gadgets and accessories for your everyday needs.
+                    </p>
+                    <a href="{{ url_for('products') }}" 
+                       class="inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition duration-300">
+                        Shop Now
+                    </a>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <img src="{{ url_for('static', filename='images/hero-image.jpg') }}" 
+                         alt="Electronics Collection" 
+                         class="w-full max-w-lg rounded-lg shadow-xl" 
+                         onerror="this.src='static/images/placeholder.jpg'">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Categories -->
+    <div class="mb-12">
+        <h2 class="text-3xl font-bold mb-6">Shop by Category</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {% for category in categories %}
+                <a href="{{ url_for('products', category=category.id) }}" 
+                   class="bg-white p-4 rounded-lg shadow hover:shadow-md transition duration-300 text-center">
+                    <div class="text-4xl mb-2 text-blue-600">
+                        <i class="fas {% if category.name == 'Computers' %}fa-laptop{% 
+                           elif category.name == 'Mobile Phones' %}fa-mobile-alt{% 
+                           elif category.name == 'Keyboards' %}fa-keyboard{% 
+                           elif category.name == 'Monitors' %}fa-desktop{% 
+                           elif category.name == 'Audio' %}fa-headphones{% 
+                           else %}fa-microchip{% endif %}"></i>
+                    </div>
+                    <h3 class="font-semibold">{{ category.name }}</h3>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Featured Products -->
+    <div class="mb-12">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold">Featured Products</h2>
+            <a href="{{ url_for('products') }}" class="text-blue-600 hover:underline">
+                View all <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for product in products %}
+                <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition duration-300">
+                    <a href="{{ url_for('product_detail', product_id=product.id) }}">
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" 
+                             class="w-full h-48 object-cover"
+                             onerror="this.src='static/images/placeholder.jpg'">
+                    </a>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-blue-600 mb-1">{{ product.category_name }}</p>
+                                <a href="{{ url_for('product_detail', product_id=product.id) }}" class="hover:text-blue-600">
+                                    <h3 class="font-semibold text-lg mb-2 line-clamp-2">{{ product.name }}</h3>
+                                </a>
+                            </div>
+                            <span class="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">
+                                {% if product.stock > 10 %}
+                                    In Stock
+                                {% elif product.stock > 0 %}
+                                    Low Stock
+                                {% else %}
+                                    Out of Stock
+                                {% endif %}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ product.description }}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-bold">${{ "%.2f"|format(product.price) }}</span>
+                            <a href="{{ url_for('product_detail', product_id=product.id) }}" 
+                                class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Info Sections -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <div class="text-3xl text-blue-600 mb-4">
+                <i class="fas fa-shipping-fast"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Fast Shipping</h3>
+            <p class="text-gray-600">Free shipping on all orders over $50</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <div class="text-3xl text-blue-600 mb-4">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Secure Payment</h3>
+            <p class="text-gray-600">100% secure payment processing</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow text-center">
+            <div class="text-3xl text-blue-600 mb-4">
+                <i class="fas fa-headset"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">24/7 Support</h3>
+            <p class="text-gray-600">Dedicated support team available</p>
+        </div>
+    </div>
+{% endblock %} 

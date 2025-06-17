@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} - Admin Panel{% endblock %}
+
+{% block content %}
+    <div class="mb-6">
+        <div class="flex items-center">
+            <a href="{{ url_for('orders') }}" class="text-blue-600 hover:underline mr-2">
+                <i class="fas fa-arrow-left"></i> Back to Orders
+            </a>
+            <span class="text-gray-400 mx-2">|</span>
+            <h1 class="text-2xl font-bold">Order #{{ order.id }}</h1>
+        </div>
+        <p class="text-gray-600">Placed on {{ order.order_date.split('T')[0] }}</p>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Order Information (2/3 width on large screens) -->
+        <div class="lg:col-span-2">
+            <!-- Order Status -->
+            <div class="bg-white rounded-lg shadow mb-6 p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="font-bold text-lg">Order Status</h2>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium
+                                   {% if order.status == 'Pending' %}bg-blue-100 text-blue-800
+                                   {% elif order.status == 'Shipped' %}bg-green-100 text-green-800
+                                   {% elif order.status == 'Delivered' %}bg-gray-100 text-gray-800
+                                   {% elif order.status == 'Cancelled' %}bg-red-100 text-red-800
+                                   {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ order.status }}
+                        </span>
+                    </div>
+                    <form method="post" action="{{ url_for('update_order_status', order_id=order.id) }}" class="flex items-center space-x-2">
+                        <select name="status" class="border rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                            <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                        <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                            Update
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Progress Tracker -->
+                <div class="relative pt-5">
+                    <!-- Progress Line -->
+                    <div class="absolute top-5 left-0 w-full h-1 bg-gray-200">
+                        <div class="h-full bg-blue-500 transition-all duration-500" 
+                             style="width: {% if order.status == 'Pending' %}25%{% elif order.status == 'Processing' %}50%{% elif order.status == 'Shipped' %}75%{% elif order.status == 'Delivered' %}100%{% else %}0%{% endif %}">
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Steps -->
+                    <div class="flex justify-between relative">
+                        <!-- Order Placed -->
+                        <div class="text-center">
+                            <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center {% if order.status %}bg-blue-500 text-white{% else %}bg-gray-200{% endif %} mb-2">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="text-sm font-medium">Order Placed</div>
+                        </div>
+                        
+                        <!-- Processing -->
+                        <div class="text-center">
+                            <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center {% if order.status != 'Pending' %}bg-blue-500 text-white{% else %}bg-gray-200{% endif %} mb-2">
+                                <i class="fas {% if order.status != 'Pending' %}fa-check{% else %}fa-box{% endif %}"></i>
+                            </div>
+                            <div class="text-sm font-medium">Processing</div>
+                        </div>
+                        
+                        <!-- Shipped -->
+                        <div class="text-center">
+                            <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center {% if order.status == 'Shipped' or order.status == 'Delivered' %}bg-blue-500 text-white{% else %}bg-gray-200{% endif %} mb-2">
+                                <i class="fas {% if order.status == 'Shipped' or order.status == 'Delivered' %}fa-check{% else %}fa-truck{% endif %}"></i>
+                            </div>
+                            <div class="text-sm font-medium">Shipped</div>
+                        </div>
+                        
+                        <!-- Delivered -->
+                        <div class="text-center">
+                            <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center {% if order.status == 'Delivered' %}bg-blue-500 text-white{% else %}bg-gray-200{% endif %} mb-2">
+                                <i class="fas {% if order.status == 'Delivered' %}fa-check{% else %}fa-home{% endif %}"></i>
+                            </div>
+                            <div class="text-sm font-medium">Delivered</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Items -->
+            <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+                <div class="px-6 py-4 border-b">
+                    <h2 class="font-bold">Order Items</h2>
+                </div>
+                <div class="p-6">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                    <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                {% for item in order_items %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-4">
+                                            <div class="flex items-center">
+                                                <img src="{{ item.image_url }}" alt="{{ item.name }}" 
+                                                     class="h-10 w-10 object-contain mr-3"
+                                                     onerror="this.src='/admin/static/images/placeholder.jpg'">
+                                                <span>{{ item.name }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-4 text-center">{{ item.quantity }}</td>
+                                        <td class="px-4 py-4 text-right">${{ "%.2f"|format(item.price) }}</td>
+                                        <td class="px-4 py-4 text-right font-medium">${{ "%.2f"|format(item.price * item.quantity) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-gray-50">
+                                    <td colspan="3" class="px-4 py-3 text-right font-bold">Total</td>
+                                    <td class="px-4 py-3 text-right font-bold">${{ "%.2f"|format(order.total_amount) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Customer Information (1/3 width on large screens) -->
+        <div>
+            <!-- Customer Details -->
+            <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+                <div class="px-6 py-4 border-b">
+                    <h2 class="font-bold">Customer Information</h2>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <h3 class="text-sm text-gray-500 mb-1">Username</h3>
+                        <p>{{ order.username }}</p>
+                    </div>
+                    <div class="mb-4">
+                        <h3 class="text-sm text-gray-500 mb-1">Email</h3>
+                        <p>{{ order.email }}</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('user_detail', user_id=order.user_id) }}" class="text-blue-600 hover:underline">
+                            <i class="fas fa-user mr-1"></i> View Customer Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shipping Information -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b">
+                    <h2 class="font-bold">Shipping Information</h2>
+                </div>
+                <div class="p-6">
+                    {% if shipping_info %}
+                        <div class="mb-4">
+                            <h3 class="text-sm text-gray-500 mb-1">Name</h3>
+                            <p>{{ shipping_info.first_name }} {{ shipping_info.last_name }}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h3 class="text-sm text-gray-500 mb-1">Address</h3>
+                            <p>{{ shipping_info.address }}</p>
+                            <p>{{ shipping_info.city }}, {{ shipping_info.state }} {{ shipping_info.zip }}</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-sm text-gray-500 mb-1">Phone</h3>
+                            <p>{{ shipping_info.phone }}</p>
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500">No shipping information available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

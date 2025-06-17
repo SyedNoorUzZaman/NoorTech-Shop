@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Admin Users - Admin Panel{% endblock %}
+
+{% block content %}
+    <div class="mb-6 flex flex-wrap justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold">Admin Users</h1>
+            <p class="text-gray-600">Manage admin access</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+            <a href="{{ url_for('add_admin_user') }}" 
+               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <i class="fas fa-plus mr-2"></i> Add Admin User
+            </a>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for admin in admins %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ admin.id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium">
+                                {{ admin.username }}
+                                {% if admin.id == session.admin_id %}
+                                    <span class="ml-1 text-xs text-green-600">(You)</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ admin.email or 'N/A' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if admin.is_super_admin %}
+                                    <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">
+                                        Super Admin
+                                    </span>
+                                {% else %}
+                                    <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                                        Admin
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <div class="flex space-x-2">
+                                    <a href="{{ url_for('edit_admin_user', admin_id=admin.id) }}" class="text-blue-600 hover:text-blue-900">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    {% if admin.id != session.admin_id %}
+                                        <form method="post" action="{{ url_for('delete_admin_user', admin_id=admin.id) }}" 
+                                            class="inline-block"
+                                            onsubmit="return confirm('Are you sure you want to delete this admin user?');">
+                                            <button type="submit" class="text-red-600 hover:text-red-900">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                No admin users found
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %} 

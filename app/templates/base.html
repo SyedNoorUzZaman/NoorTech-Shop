@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NoorTech Shop{% endblock %}</title>
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .flash-message {
+            animation: fadeOut 5s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="min-h-screen bg-gray-50 flex flex-col">
+    <header class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold">NoorTech Shop</a>
+            
+            <div class="flex items-center">
+                <form action="{{ url_for('products') }}" method="get" class="hidden sm:flex mr-4">
+                    <input type="text" name="search" placeholder="Search products..." 
+                           class="px-3 py-1 rounded-l text-black">
+                    <button type="submit" class="bg-gray-800 text-white px-3 py-1 rounded-r hover:bg-gray-700">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+                
+                <nav class="space-x-4 flex items-center">
+                    <a href="{{ url_for('products') }}" class="hover:underline">Products</a>
+                    <a href="{{ url_for('track_order') }}" class="hover:underline">Track Order</a>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('view_cart') }}" class="hover:underline">
+                            <i class="fas fa-shopping-cart"></i> Cart
+                        </a>
+                        <div class="relative group">
+                            <button class="hover:underline flex items-center">
+                                <i class="fas fa-user mr-1"></i> Account <i class="fas fa-caret-down ml-1"></i>
+                            </button>
+                            <div class="absolute right-0 w-40 bg-white text-black shadow-lg rounded mt-1 hidden group-hover:block z-10">
+                                <a href="{{ url_for('view_profile') }}" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                                <a href="{{ url_for('order_history') }}" class="block px-4 py-2 hover:bg-gray-100">Orders</a>
+                                <a href="{{ url_for('logout') }}" class="block px-4 py-2 hover:bg-gray-100">Logout</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="hover:underline">Login</a>
+                        <a href="{{ url_for('register') }}" class="hover:underline">Register</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Mobile search (hidden on desktop) -->
+        <div class="block sm:hidden pb-3 px-4">
+            <form action="{{ url_for('products') }}" method="get" class="flex">
+                <input type="text" name="search" placeholder="Search products..." 
+                       class="px-3 py-1 rounded-l text-black flex-1">
+                <button type="submit" class="bg-gray-800 text-white px-3 py-1 rounded-r hover:bg-gray-700">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </header>
+    
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mx-auto px-4 mt-4">
+                {% for category, message in messages %}
+                    <div class="flash-message p-4 rounded {% if category == 'error' %}bg-red-200 border border-red-400 text-red-800{% else %}bg-green-200 border border-green-400 text-green-800{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <main class="container mx-auto flex-grow px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">About NoorTech Shop</h3>
+                    <p class="text-gray-300">Your one-stop destination for all electronic products at competitive prices.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Quick Links</h3>
+                    <ul class="space-y-1 text-gray-300">
+                        <li><a href="{{ url_for('home') }}" class="hover:text-white">Home</a></li>
+                        <li><a href="{{ url_for('products') }}" class="hover:text-white">Products</a></li>
+                        <li><a href="{{ url_for('track_order') }}" class="hover:text-white">Track Order</a></li>
+                        {% if current_user.is_authenticated %}
+                            <li><a href="{{ url_for('order_history') }}" class="hover:text-white">Orders</a></li>
+                            <li><a href="{{ url_for('view_profile') }}" class="hover:text-white">My Profile</a></li>
+                        {% else %}
+                            <li><a href="{{ url_for('login') }}" class="hover:text-white">Login</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Contact</h3>
+                    <address class="text-gray-300 not-italic">
+                        <p>Email: contact@NoorTech Shop.com</p>
+                        <p>Phone: +1 (555) 123-4567</p>
+                        <div class="mt-2 space-x-2">
+                            <a href="#" class="text-white hover:text-gray-300"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="text-white hover:text-gray-300"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-white hover:text-gray-300"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </address>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-700 text-center text-gray-400">
+                <p>&copy; {{ now.year if now else '2023' }} NoorTech Shop. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

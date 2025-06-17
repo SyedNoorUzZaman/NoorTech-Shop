@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - NoorTech Shop{% endblock %}
+
+{% block content %}
+    <div class="mb-6">
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{{ url_for('home') }}" class="text-gray-700 hover:text-blue-600">Home</a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <a href="{{ url_for('products') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Products</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <a href="{{ url_for('products', category=product.category_id) }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">{{ product.category_name }}</a>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="ml-1 text-gray-500 md:ml-2">{{ product.name }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+            <!-- Product Image -->
+            <div class="flex justify-center items-center">
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" 
+                     class="max-h-96 object-contain"
+                     onerror="this.src='static/images/placeholder.jpg'">
+            </div>
+            
+            <!-- Product Info -->
+            <div>
+                <div class="mb-4">
+                    <h1 class="text-3xl font-bold mb-2">{{ product.name }}</h1>
+                    <a href="{{ url_for('products', category=product.category_id) }}" class="text-blue-600 hover:underline">
+                        {{ product.category_name }}
+                    </a>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-2xl font-bold text-blue-600">${{ "%.2f"|format(product.price) }}</p>
+                    <div class="mt-2">
+                        {% if product.stock > 10 %}
+                            <span class="bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full">
+                                <i class="fas fa-check-circle mr-1"></i> In Stock
+                            </span>
+                        {% elif product.stock > 0 %}
+                            <span class="bg-yellow-100 text-yellow-800 text-sm px-2 py-1 rounded-full">
+                                <i class="fas fa-exclamation-circle mr-1"></i> Low Stock ({{ product.stock }} left)
+                            </span>
+                        {% else %}
+                            <span class="bg-red-100 text-red-800 text-sm px-2 py-1 rounded-full">
+                                <i class="fas fa-times-circle mr-1"></i> Out of Stock
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h2 class="text-lg font-semibold mb-2">Description</h2>
+                    <p class="text-gray-700">{{ product.description }}</p>
+                </div>
+                
+                {% if product.stock > 0 %}
+                    <form method="post" action="{{ url_for('add_to_cart', product_id=product.id) }}" class="mb-6">
+                        <div class="flex items-center mb-4">
+                            <label for="quantity" class="mr-4">Quantity:</label>
+                            <div class="custom-number-input flex">
+                                <button type="button" onclick="decrementQuantity()" 
+                                        class="bg-gray-200 px-3 py-1 rounded-l hover:bg-gray-300">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock }}" 
+                                       class="w-16 text-center border-y focus:outline-none focus:ring-0">
+                                <button type="button" onclick="incrementQuantity()" 
+                                        class="bg-gray-200 px-3 py-1 rounded-r hover:bg-gray-300">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+                            <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                        </button>
+                    </form>
+                {% endif %}
+                
+                <div class="border-t pt-4 grid grid-cols-2 gap-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-truck text-gray-500 mr-2"></i>
+                        <span>Free shipping over $50</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-undo text-gray-500 mr-2"></i>
+                        <span>30-day returns</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-shield-alt text-gray-500 mr-2"></i>
+                        <span>Secure checkout</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-headset text-gray-500 mr-2"></i>
+                        <span>24/7 support</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Products -->
+    {% if related_products %}
+        <div class="mt-12">
+            <h2 class="text-2xl font-bold mb-6">Related Products</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for product in related_products %}
+                    <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition duration-300">
+                        <a href="{{ url_for('product_detail', product_id=product.id) }}">
+                            <img src="{{ product.image_url }}" alt="{{ product.name }}" 
+                                 class="w-full h-48 object-cover"
+                                 onerror="this.src='static/images/placeholder.jpg'">
+                        </a>
+                        <div class="p-4">
+                            <a href="{{ url_for('product_detail', product_id=product.id) }}" class="hover:text-blue-600">
+                                <h3 class="font-semibold text-lg mb-2">{{ product.name }}</h3>
+                            </a>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold">${{ "%.2f"|format(product.price) }}</span>
+                                <a href="{{ url_for('product_detail', product_id=product.id) }}" 
+                                   class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                    View
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function decrementQuantity() {
+        const quantityInput = document.getElementById('quantity');
+        if (parseInt(quantityInput.value) > 1) {
+            quantityInput.value = parseInt(quantityInput.value) - 1;
+        }
+    }
+    
+    function incrementQuantity() {
+        const quantityInput = document.getElementById('quantity');
+        const maxValue = parseInt(quantityInput.max);
+        if (parseInt(quantityInput.value) < maxValue) {
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+        }
+    }
+</script>
+{% endblock %} 
